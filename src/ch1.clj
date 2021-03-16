@@ -1,4 +1,4 @@
-(ns ch1.core
+(ns ch1.ch1
   (:require [java-time :as t]))
 
 
