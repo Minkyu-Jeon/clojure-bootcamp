@@ -1,7 +1,6 @@
 (ns ch1
   (:require [java-time :as t]))
 
-
 ;1.1.5
 (for [x [:a :b], y (range 5) :when (odd? y)]
   [x y])
@@ -134,6 +133,18 @@
     (board index)))
 (lookup3 (initial-board) "a1")
 
+;; for loop
+(defmacro for-loop [[sym init check change :as params] & steps]
+  `(loop [~sym ~init value# nil]
+     (if ~check
+       (let [new-value# (do ~@steps)]
+         (recur ~change new-value#))
+       value#)))
+
+;; Usage:
+(for-loop [i 0 (< i 10) (inc i)]
+          (prn i))
+
 
 
 (comment
@@ -182,6 +193,7 @@
    :wind_direction 15
    :wind_velocity  85})
 (prn ((juxt :temperature :humidity :wind_direction :wind_velocity) data))
+
 (defn add-and-multiply
   [n_add n_multiply original]
   ((juxt #(+ n_add %) #(* n_multiply %)) original))
@@ -207,8 +219,6 @@
        (apply (comp reverse str +))))
 (sum-stringify-reverse (range 100))                         ;(\0 \5 \9 \4)
 
-
-
 (comment
   "iterate = infinite lazy sequence!")
 (take 10 (iterate (partial * 3) 20))                        ;(20 60 180 540 1620 4860 14580 43740 131220 393660)
@@ -219,7 +229,6 @@
        (iterate #(t/plus % (t/days 1)))
        (take input)))
 (ndays 15)
-
 
 (comment
   "cycle")
