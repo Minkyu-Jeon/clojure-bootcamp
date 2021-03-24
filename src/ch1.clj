@@ -69,21 +69,21 @@
 
 ;1.4.3
 (defprotocol Concatenatable
-  (cat [this other]))
+  (caten [this other]))
 
 (extend-type String
   Concatenatable
-  (cat [this other]
+  (caten [this other]
     (.concat this other)))
 
-(cat "House" " of Cards")
+(caten "House" " of Cards")
 
 (extend-type java.util.List
   Concatenatable
-  (cat [this other]
+  (caten [this other]
     (concat this other)))
 
-(cat [1 2 3] [4 5 6])
+(caten [1 2 3] [4 5 6])
 
 
 ;1.5
