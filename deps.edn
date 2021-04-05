@@ -1,3 +1,5 @@
 {:paths ["src"]
- :deps  {clojure.java-time {:mvn/version "0.3.2"}}}
+ :deps  {clojure.java-time {:mvn/version "0.3.2"}
+         quil/quil         {:mvn/version "3.1.0"}}}
+
 
