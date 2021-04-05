@@ -192,11 +192,14 @@
    :humidity       20
    :wind_direction 15
    :wind_velocity  85})
-(prn ((juxt :temperature :humidity :wind_direction :wind_velocity) data))
+((juxt :temperature :humidity :wind_direction :wind_velocity) data)
+((juxt inc dec #(* 2 %)) 10)
+
 
 (defn add-and-multiply
   [n_add n_multiply original]
   ((juxt #(+ n_add %) #(* n_multiply %)) original))
+
 (add-and-multiply 10 2 5)
 
 (comment
@@ -222,13 +225,16 @@
 (comment
   "iterate = infinite lazy sequence!")
 (take 10 (iterate (partial * 3) 20))                        ;(20 60 180 540 1620 4860 14580 43740 131220 393660)
+
 (defn ndays
   "vector of 7 days"
   [input]
   (->> (t/local-date)
-       (iterate #(t/plus % (t/days 1)))
+       (iterate #(t/plus % (t/days 2)))
        (take input)))
+
 (ndays 15)
+
 
 (comment
   "cycle")

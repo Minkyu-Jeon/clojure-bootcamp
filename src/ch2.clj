@@ -1,8 +1,8 @@
 (ns ch2
   (:require [clojure.set :as s]
             [clojure.string :refer (capitalize)])
-  (:import [java.util HashMap]
-           [java.util.concurrent.atomic AtomicLong]))
+  (:import (java.util HashMap)
+           (java.util.concurrent.atomic AtomicLong)))
 
 (def numbers
   [127 0x7F 0177 32r3V 2r01111111])
