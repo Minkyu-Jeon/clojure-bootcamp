@@ -245,4 +245,4 @@
 (pos even? [2 3 6 7])
 
 (defn pos [pred coll]
- (for [[i v] (index coll) :when (pred v)] i))
+  (for [[i v] (index coll) :when (pred v)] i))
