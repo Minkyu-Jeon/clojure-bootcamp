@@ -1,3 +1,6 @@
 joc.iml
 .idea
 .nrepl-port
+.calva
+.cpcache
+.lsp
