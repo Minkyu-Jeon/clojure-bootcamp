@@ -74,8 +74,12 @@
         [[1 2 3 4 5 6] [7 0 -1] [8 8] []])
 
 ;; 주어진 시퀀스에서 인덱스 4이상 11미만의 수 중 짝수만 자리를 바꾸기 [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15], filterer 사용
-;; 데이터 구조안의 모든 숫자를 꺼내기 {2 [1 2 [6 7]] :a 4 :c {:a 1 :d [2 nil]}}, walker 사용
-;; 모든 leaf 노드의 nil 없애기 {1 {:a nil :b "hello" :c {:d nil :e 23}} 2 nil}, walker 사용
+(transform [(srange 4 13) (filterer even?)] reverse [0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15])
 
+;; 데이터 구조안의 모든 숫자를 꺼내기 {2 [1 2 [6 7]] :a 4 :c {:a 1 :d [2 nil]}}, walker 사용
+(select [(walker int?)] {2 [1 2 [6 7]] :a 4 :c {:a 1 :d [2 nil]}})
+
+;; 모든 leaf 노드의 nil 없애기 {1 {:a nil :b "hello" :c {:d nil :e 23}} 2 nil}, walker 사용
+(setval [(walker nil?)] NONE {1 {:a nil :b "hello" :c {:d nil :e 23}} 2 nil})
 
 
