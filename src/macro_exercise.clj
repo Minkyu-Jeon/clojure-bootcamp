@@ -13,7 +13,9 @@
 ; ~@ unquote splicing
 ; # auto gen-sym
 
-
+;; code is data 란? -> code의 표현식과 데이터의 표현식이 일치한다.
+;; 함수(function)은 런타임에 값을 받아 애플리케이션이 필요로 하는 값을 리턴
+;; 매크로는 컴파일 타임에 코드를 받아 필요한 코드를 리턴
 
 (read-string "(+ 1 2 3 4 5)")
 (class (read-string "(+ 1 2 3 4 5)"))
