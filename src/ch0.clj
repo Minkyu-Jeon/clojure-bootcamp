@@ -2,8 +2,8 @@
 
 ;; def => 상수
 (def x 1)
-(inc x)                                                     ;; 2
-(prn x)
+(inc x) ;; 2
+(prn x) ;; 2?
 
 ;; defn => 함수 선언 (매크로)
 (defn plus_5 [x] (+ x 5))
@@ -154,3 +154,33 @@
          :b 23
          :c " ,world!"})
 ;; reduce는 사실상 all-mighty한 고차함수라 지양하는 것이 좋습니다!
+
+
+;; loop recur
+;; clojure의 for != 절차 지향 언어의 for
+;; 예를 들어 이중 loop 은?
+
+;; for(int i=0; i<10; i++)
+;; for(int j=0; j<10; j++)
+;; k++
+
+(def k 0)
+(for [i (range 10)
+      j (range 10)]
+  (inc k)) ;; 안된다.
+
+;; atom, ref, var 등을 써야함
+(def k-atom (atom 1))
+(for [i (range 10)
+      j (range 10)]
+  (swap! k-atom inc))
+
+(loop [i 0] ;; for i=0
+  (if (< i 100) ;; i<100
+    (recur (inc i)) ;; i++
+    (prn "i->" i)))
+
+(loop [x 10]
+  (when (> x 1)
+    (println x)
+    (recur (- x 2))))
