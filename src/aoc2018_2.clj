@@ -14,18 +14,24 @@
 ;; ababab 3개의 a, 3개의 b 지만 한 문자열에서 같은 갯수는 한번만 카운트함 -> (두번 나오는 문자열 수: 4, 세번 나오는 문자열 수: 3)
 ;; 답 : 4 * 3 = 12
 
-(def vect (str/split (slurp "input/day2_input.txt") #"\n"))
+(def vect (->> "input/day2_input.txt"
+               (slurp)
+               (str/split-lines)))
 
 
 (defn two-three-vector [line]
-  (let [word-count-set (->> (vals (reduce (fn [acc v] (if (nil? (get acc v))
-                                              (assoc acc v 1)
-                                              (assoc acc v (+ 1 (get acc v)))))
-                                {} (seq line)))
-                  (into #{}))]
-    (map (fn [item] (if (contains? word-count-set item) 1 0))
-         [2 3])))
+  (let [frequencySet (->> line
+                      (char-array)
+                      (seq)
+                      (frequencies)
+                      (vals)
+                      (into #{}))]
+    (->> [2 3]
+         (map (fn [item] (if (frequencySet item)
+                           1
+                           0))))))
 
+(two-three-vector (first vect))
 
 (defn solve [vect]
   (loop [vect vect m [0 0]]
@@ -33,8 +39,6 @@
       (if (nil? line)
         (* (nth m 0) (nth m 1))
         (recur (rest vect) (map + m (two-three-vector line)))))))
-
-
 
 (solve vect)
 

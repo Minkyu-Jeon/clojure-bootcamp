@@ -1,12 +1,16 @@
-(ns aoc2018-1)
-(require '[clojure.string :as str])
+(ns aoc2018-1
+  (:require [clojure.string :as str]))
+
 
 ;; 파트 1
 ;; 주어진 입력의 모든 숫자를 더하시오.
 ;; 예) +10 -2 -5 +1 이 입력일 경우 4를 출력
+(def vect (->>
+           "input/day1_input.txt"
+           (slurp)
+           (str/split-lines)
+           (map #(. Integer parseInt %))))
 
-(def vect (->> (str/split (slurp "input/day1_input.txt") #"\n")
-               (map read-string)))
 
 (reduce + vect)
 
@@ -16,13 +20,15 @@
 ;; 0 -> 3 (+3) -> 6 (+3) -> 10(+4) -> 8(-2) -> 4(-4) -> 7(+3) -> 10(+3) -> ...
 
 
-(defn find-first-twice-number [vect]
-  (loop [vect vect acc 0 resultSet #{}]
-    (let [firstValue (first vect) nextValue (+ acc firstValue)]
-      (if (contains? resultSet nextValue)
-        nextValue
-        (recur (rest vect) nextValue (conj resultSet nextValue))))))
-
-(println vect)
+(defn find-first-twice-number [initialVect]
+  (loop
+   [vect initialVect
+    acc 0
+    resultSet #{}]
+    (if (resultSet (+ acc (first vect)))
+      (+ acc (first vect))
+      (recur (rest vect)
+             (+ acc (first vect))
+             (conj resultSet (+ acc (first vect)))))))
 
 (find-first-twice-number (cycle vect))
