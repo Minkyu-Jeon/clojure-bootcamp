@@ -65,7 +65,7 @@
    (map (fn [item] (if (= (nth item 0) (nth item 1))
                      (nth item 0)
                      nil)))
-   (keep clojure.core/identity)
+   (keep identity)
    (str/join)))
 
 (defn make-string-pair [vect]
@@ -85,7 +85,7 @@
                               (if (= (- (count str1) 1) (->> intersection (count)))
                                 intersection
                                 nil))))
-     (keep clojure.core/identity))
+     (keep identity))
 
 
 ;; bvhaknyooqsudzrpggslectkj
