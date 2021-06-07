@@ -1,5 +1,6 @@
 (ns aoc2018-2
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str])
+  (:require [clojure.core]))
 
 ;; 파트 1
 ;; 주어진 각각의 문자열에서, 같은 문자가 두번 혹은 세번씩 나타난다면 각각을 한번씩 센다.
@@ -21,17 +22,15 @@
 
 (defn two-three-vector [line]
   (let [frequencySet (->> line
-                      (char-array)
-                      (seq)
-                      (frequencies)
-                      (vals)
-                      (into #{}))]
+                          (char-array)
+                          (seq)
+                          (frequencies)
+                          (vals)
+                          (into #{}))]
     (->> [2 3]
          (map (fn [item] (if (frequencySet item)
                            1
                            0))))))
-
-(two-three-vector (first vect))
 
 (defn solve [vect]
   (loop [vect vect m [0 0]]
@@ -56,3 +55,38 @@
 ;; wvxyz
 
 ;; 주어진 예시에서 fguij와 fghij는 같은 위치 (2번째 인덱스)에 정확히 한 문자 (u와 h)가 다름. 따라서 같은 부분인 fgij를 리턴하면 됨.
+
+(defn to-char-seq [str] (->> str (char-array) (seq)))
+
+(defn intersect-chars
+  [str1 str2]
+  (->>
+   (map vector (to-char-seq str1) (to-char-seq str2))
+   (map (fn [item] (if (= (nth item 0) (nth item 1))
+                     (nth item 0)
+                     nil)))
+   (keep clojure.core/identity)
+   (str/join)))
+
+(defn make-string-pair [vect]
+  (loop [total-vect []
+         vect vect
+         vect2 (rest vect)]
+    (if (empty? (rest vect))
+      total-vect
+      (if (empty? (rest vect2))
+        (recur total-vect (rest vect) (rest (rest vect)))
+        (recur (conj total-vect [(first vect) (first vect2)]) vect (rest vect2))))))
+
+(->> vect
+     (make-string-pair)
+     (map (fn [[str1 str2]] (let
+                             [intersection (intersect-chars str1 str2)]
+                              (if (= (- (count str1) 1) (->> intersection (count)))
+                                intersection
+                                nil))))
+     (keep clojure.core/identity))
+
+
+;; bvhaknyooqsudzrpggslectkj
+
