@@ -314,3 +314,41 @@ if ( obj != null && obj.isWhatiz() ) {
 (nthr tri-nums 99)
 ;=> 5050
 ```
+
+## 종합하기
+
+기존의 퀵정렬과 다른 점
+
+1. 지연을 활용한 꼬리 재귀 버전
+2. 점진적 실행의 문제로부터 분리시킴. 시퀀스에서 오직 계산에 필요한 부분만 계산 되어야함
+
+
+### 구현
+
+아래는 n을 입력 받아 0부터 n까지 범위 내에 있는 숫자를 무작위로 나열한 시퀀스(seq)를 생성하는 함수이다.
+
+```clojure
+(ns joy.q)
+
+(defn rand-ints [n]
+  (take n (repeatedly #(rand-int n))))
+
+(rand-ints 10)
+;;=> (0 1 5 7 3 5 6 4 9 0)
+```
+
+다음은 지연을 이용한 점진적인 퀵정렬을 구현한 것이다.
+```clojure
+(defn sort-parts [work]
+  (lazy-seq
+    (loop [[part & parts] work] ;; work를 분리시킨다
+      (if-let [[pivot & xs] (seq part)]
+        (let [smaller? #(< % pivot)] ;; pivot을 비교하는 함수 정의
+          (recur (list *
+                  (filter smaller? xs) ;; pivot보다 작은 경우의 처리
+                  pivot ;; pivot 자신에 대한 처리
+                  (remove smaller? xs) ;; pivot보다 큰 경우의 처리
+                  parts))) ;; parts 접근
+        (when-let [[x & parts] parts]
+          (cons x (sort-parts parts))))))) ;; parts가 더 있으면 나머지도 정렬
+```
