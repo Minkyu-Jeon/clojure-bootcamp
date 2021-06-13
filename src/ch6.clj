@@ -15,8 +15,11 @@
 
 (xconj nil 5)
 
+(let [some-local :a-key]  
+  (get {:a-key 42} some-local)) ;; good (명확)
 (let [some-local :a-key]
-  (get {:a-key 42} :a-key))
+  (some-local {:a-key 42})) ;; bad (불명확)
+
 
 (defn xconj [t v]
   (cond
@@ -139,6 +142,8 @@
 
 (defer-expensive (delay :cheap)
                  (delay (do (Thread/sleep 5000) :expensive)))
+
+(delay? (delay :cheap))
 
 ;(defer-expensive (delay false)
 ;                 (delay (do (Thread/sleep 5000) :expensive)))
