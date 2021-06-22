@@ -2,7 +2,9 @@
 
 ## 불변성이란?
 
-메모리에 할당 된 값을 변경하지 않는 것
+상태를 변경하지 않는것 
+
+메모리에 할당 된 값을 변경하지 않는 것(ex. 변수의 재할당)
 
 ### 예정된 불변 vs 합의에 의한 불변
 
@@ -13,6 +15,8 @@
 1. 모든 필드가 final로 선언 되어야 함
 2. 객체를 생성하는 과정에서 this를 통한 객체의 참조가 불가능 해야함
 3. 내부의 불변 객체들은 클래스 안에서 복사만 허용되고 외부로 참조되지 않아야 함.
+
+위와 같이 가변성을 가진 언어들은 상세한 합의를 통해 불변성을 구현할 수 있다.
 
 클로저는 언어의 특징 중 하나로 불변 데이터 구조를 제공함
 
@@ -38,6 +42,10 @@
 
 클로저: 데이터는 불변이고, 참조 자체가 다른 데이터를 가르키게됨
 
+---------
+
+위와 같은 특징은 병렬 프로그래밍을 하는데 있어서 에러에 구애받지 않고 다른 스레드에 자유럽게 전달하는 것이 가능해짐!
+
 ## 구조적 공유: 영속적 구조
 
 list는 가장 단순한 형태의 공유 구조 타입이다.
@@ -51,6 +59,41 @@ list는 가장 단순한 형태의 공유 구조 타입이다.
 (identical? (next lst1) (next lst2)) => true
 ```
 `lst1` `lst2`가 공유하는 부분은 단순히 같은 것이 아니라, 같은 메모리 주소를 가르키고있음.
+
+만약 클로저가 구조 공유를 하지 않고, 매번 모든 배열을 복사한다면? 매우 비효율적일 것.
+
+그러면 클로저는 어떻게 효율적으로 영속적인 자료구조를 구현했을까?
+
+아래 그림은 영속적 자료구조를 개념적으로 나타낸 것이다.
+
+![persistent-vector](./images/persistent-vector-1.png)
+
+- 이진트리와 비슷하지만, 트리의 내부 노드에는 최대 두 개의 하위 노드에 대한 참조가 있고 Element 자체를 포함하지 않음.
+-  각 Element들은 정렬되어있음
+- 모든 리프 노드는 같은 레벨
+
+
+영속성을 유지하면서, 복사를 최소화 하기 위해 경로 복사를 수행함.
+경로의 모든 노드를 업데이트 혹은 삽입 하려는 값까지 복사하고 맨 아래의 값을 새 값으로 바꿈
+
+
+![persistent-vector-2](./images/persistent-vector-2.png)
+
+
+실제로 클로저의 Persistent Vector는 각 노드마다 32개의 브랜치를 가지고 있음. 노드마다 32개의 브랜치가 있으면 350억개의 원소를 단 7 depth 만에 담을 수 있음. 아래 그림은
+위의 개념적인 트리를 4-way 브랜치 트리로 확장한 것이다.
+
+![persistent-vector-3](./images/persistent-vector-3.png)
+
+**참고자료**
+
+[클로저의 Persistent Vector 이해 part1](https://hypirion.com/musings/understanding-persistent-vector-pt-1)
+
+[클로저의 Persistent Vector 이해 part2](https://hypirion.com/musings/understanding-persistent-vector-pt-2)
+
+[클로저의 Persistent Vector 이해 part3](https://hypirion.com/musings/understanding-persistent-vector-pt-3)
+
+
 
 아래는 간단한 이진트리 구현이다.
 
@@ -69,7 +112,9 @@ list는 가장 단순한 형태의 공유 구조 타입이다.
     :else {:val (:val t)
            :L   (:L t)
            :R   (xconj (:R t) v)}))
+```
 
+```clojure
 ;; 키워드가 함수 호출 위치에 있는 경우 맵을 parameter로 받아
 ;; 자기 자신을 조회하는 함수로 동작
 ;; 코드 작성 스타일에 따라 선택하는 문제이지만
@@ -79,7 +124,8 @@ list는 가장 단순한 형태의 공유 구조 타입이다.
   (get {:a-key 42} some-local)) ;; good
 (let [some-local :a-key]
   (some-local {:a-key 42})) ;; bad
-
+```
+```clojure
 (def tree1 (xconj nil 5))
 (def tree2 (xconj tree1 3))
 (def tree3 (xconj tree2 2))
@@ -104,7 +150,7 @@ list는 가장 단순한 형태의 공유 구조 타입이다.
 - 트리의 길이가 깊어지면 오버플로우 발생 가능
 - xseq가 지연 시퀀스가 아닌, 트리 전체를 복사하는 방식
 - 비균형적인 트리를 생성함.
-  - self balanced tree중 하나인 Red-Black 트리를 사용하여 검색 효율을 유지한다.
+  - 클로저의 정렬된 컬렉션은 이진트리이지만, Red-Black 트리를 사용하여 조회나 갱신 효율을 유지한다.
 
 
 ## 지연
@@ -173,8 +219,26 @@ if ( obj != null && obj.isWhatiz() ) {
 - 시퀀스의 헤드를 붙들고 있지 말자.
 
 들어가기전에 잠깐 `rest`와 `next`의 비교
+```clojure
+(def very-lazy (-> (iterate #(do (print \.) (inc %)) 1)
+                   rest
+                   rest
+                   rest))
+;=>..#'ch6/very-lazy
+(def less-lazy (-> (iterate #(do (print \.) (inc %)) 1)
+                   next
+                   next
+                   next))
+;=>..#'ch6/less-lazy
+
+(println (first very-lazy)) ; .4
+(println (first less-lazy)) ; .4
 ```
-```
+책에서 설명하는 내용은 rest는 필요보다 많은 요소들에 대한 실체화를 수행하지 않지만,
+`next`는 수행한다고 한다. `next`를 사용하면 지연 시퀀스의 한 개 요소가 덜 지연 되도록
+함으로써 비용이 높으면 실체화되지 않도록 만든다.
+일반적으로 코드가 가능한 지연되어야 하는 특별한 경우 외에는 `next`를 사용하는 것을 권장한다고 한다.
+
 
 다음은 `lazy-seq`를 활용하여 스택 오버플로우가 발생하지 않도록 수정한 버전이다.
 ```clojure
@@ -351,4 +415,17 @@ if ( obj != null && obj.isWhatiz() ) {
                   parts))) ;; parts 접근
         (when-let [[x & parts] parts]
           (cons x (sort-parts parts))))))) ;; parts가 더 있으면 나머지도 정렬
+
+(defn qsort [xs]
+  (sort-parts (list xs)))
+
+(qsort [2 1 4 3])
+;=> (1 2 3 4)
+
+(take 10 (qsort (rand-ints 10000)))
+;=> (0 0 0 4 4 7 7 8 9 9)
+;; 퀵 정ㅇ렬 최선의 경우보다 낮은 차수.
+;; 다만 take에 입력된 값이 실제 요소 개수와 가까워질수록 복잡도의 격차는 줄어듦
 ```
+
+![qsort](./images/06fig05.jpg)
