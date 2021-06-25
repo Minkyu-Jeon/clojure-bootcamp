@@ -28,7 +28,7 @@
 
 (defn update-fabric [fabric claim]
   (reduce (fn [acc coord] (if (get acc coord)
-                            (update acc coord + 1)
+                            (update acc coord inc)
                             (assoc acc coord 1)))
           fabric
           (make-coords claim)))
@@ -41,7 +41,7 @@
                   (map #(= (fabric %) 1)))]
     (if (every? true? area)
       claim
-      false)))
+      nil)))
 
 
 (def updated-fabric (->> claims
