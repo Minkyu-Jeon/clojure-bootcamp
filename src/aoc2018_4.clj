@@ -1,35 +1,33 @@
 (ns aoc2018-4
-  (:require [clojure.string :as str])
-  (:require [clojure.core]))
+  (:require [clojure.string]
+            [clojure.core]))
 
 
 (defn parse-line [line]
   (let [[time & action] (-> line
-                            (str/replace #"[\[\]#]" "")
-                            (str/split #" ")
+                            (clojure.string/replace #"[\[\]#]" "")
+                            (clojure.string/split #" ")
                             (rest))]
-    {:time (->> (str/split time #":") (fnext) (. Integer parseInt))
-     :guard-id (if-let [guard-id (re-matches #"[0-9]+" (nth action 1))]
-                 (. Integer parseInt guard-id)
-                 nil)}))
+    {:time (->> (clojure.string/split time #":") (fnext) (. Integer parseInt))
+     :guard-id (when-let [guard-id (re-matches #"[0-9]+" (nth action 1))]
+                 (. Integer parseInt guard-id))}))
 
-(defn update-guard-ids [lines]
+(defn update-guard-ids [parse-fn lines]
   (loop [new-lines []
          guard-id nil
-         [first & rest] lines]
-    (if (nil? first)
-      new-lines
+         [first & rest] (map parse-fn lines)]
+    (if first
       (if-let [new-guard-id (:guard-id first)]
         (recur new-lines new-guard-id rest)
-        (recur (conj new-lines (assoc first :guard-id guard-id)) guard-id rest)))))
+        (recur (conj new-lines (assoc first :guard-id guard-id)) guard-id rest))
+      new-lines)))
 
 
 (def input (->> "input/day4_input.txt"
                 (slurp)
-                (str/split-lines)
+                (clojure.string/split-lines)
                 (sort)
-                (map parse-line)
-                (update-guard-ids)))
+                (update-guard-ids parse-line)))
 
 (defn calc-sleeping-time [lines]
   (loop [minutes {}
@@ -38,9 +36,7 @@
       minutes
       (let [next-minutes (->> (range (:time sleep) (:time awake))
                               (reduce (fn [acc min]
-                                        (if (nil? (get acc min))
-                                          (assoc acc min [(:guard-id sleep)])
-                                          (update acc min #(conj %1 (:guard-id sleep)))))
+                                        (update acc min (fnil conj []) (:guard-id sleep)))
                                       minutes))]
         (recur next-minutes rest)))))
 
@@ -59,9 +55,9 @@
         (fn [acc [_ frequencies-by-minute]]
           (->> frequencies-by-minute
                (reduce (fn [acc2 [guard-id times]]
-                         (if (nil? (get acc2 guard-id))
-                           (assoc acc2 guard-id times)
-                           (update acc2 guard-id + times)))
+                         (if (get acc2 guard-id)
+                           (update acc2 guard-id + times)
+                           (assoc acc2 guard-id times)))
                        acc)))
         {})))
 
@@ -88,7 +84,6 @@
 
 ;; part 2: 한 가드가 가장 오래 잠들어있던 분 * 그 가드의 ID
 (comment (let [[min [guard-id _]] (->> frequency-map
-                                       (map (fn [[k v]] [k (get-max v)]))
-                                       (vec)
+                                       (mapv (fn [[k v]] [k (get-max v)]))
                                        (apply max-key #(second (second %1))))]
            (* min guard-id)))
