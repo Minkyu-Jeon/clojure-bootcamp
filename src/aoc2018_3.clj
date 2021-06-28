@@ -39,9 +39,7 @@
   [fabric claim]
   (let [area (->> (make-coords claim)
                   (map #(= (fabric %) 1)))]
-    (if (every? true? area)
-      claim
-      false)))
+    (every? true? area)))
 
 
 (def updated-fabric (->> claims
