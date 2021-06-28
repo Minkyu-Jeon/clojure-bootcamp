@@ -7,48 +7,35 @@
                 (slurp)
                 (map int)))
 
-(defn abs [n] (if (< n 0)
-                (* -1 n)
-                n))
+(defn abs [n] (max n (- n)))
 
 (defn reacted? [x y] (= (abs (- x y)) 32))
 
-(defn react-polymer [state]
-  (loop [result []
-         [first-item & rest] state]
-    (if rest
-      (if (not-empty result)
-        (let [last-item (peek result)]
-          (if (reacted? last-item first-item)
-            (recur (pop result) rest)
-            (recur (conj result first-item) rest)))
-        (recur (conj result first-item) rest))
-      (conj result first-item))))
-
-(def char-vec (->> (zipmap
-                    (range
-                     (int \A)
-                     (int \Z))
-                    (range
-                     (int \a)
-                     (int \z)))
-                   (map (fn [item] (into #{} item)))))
+(defn react-polymer [polymer]
+  (->> polymer
+       (reduce (fn [reduced-polymer first-item]
+                 (if (empty? reduced-polymer)
+                   (conj reduced-polymer first-item)
+                   (if-let [_ (reacted? (peek reduced-polymer) first-item)]
+                     (pop reduced-polymer)
+                     (conj reduced-polymer first-item))))
+               [])))
 
 (defn remove-chars [polymer char-set]
-  (->> polymer
-       (filter (fn [item] ((complement contains?) char-set item)))))
+  (filter #((complement contains?) char-set %) polymer))
+
+(defn generate-polymer-seq-with-removed-chars [polymer]
+  (for [i (range (int \a) (int \z))]
+    (remove-chars polymer #{i (- i 32)})))
 
 ;; part1
 (comment (->> input
-              (react-polymer)
-              (count)))
+              react-polymer
+              count))
 
 ;; part2
-(comment (->> char-vec
-              (map (fn [char-set]
-                     (let [removed-chars (remove-chars input char-set)]
-                       {char-set (->> removed-chars
-                                      (react-polymer)
-                                      (count))})))
-              (apply conj)
-              (apply min-key val)))
+(comment (->> input
+              generate-polymer-seq-with-removed-chars
+              (map #(react-polymer %))
+              (map count)
+              (apply min)))
