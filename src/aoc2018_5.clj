@@ -3,8 +3,7 @@
             [clojure.core]))
 
 
-(def input (->> "input/day5_input.txt"
-                (slurp)
+(def input (->> (slurp "input/day5_input.txt")
                 (map int)))
 
 (defn abs [n] (max n (- n)))

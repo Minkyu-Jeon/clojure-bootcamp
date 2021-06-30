@@ -1,18 +1,16 @@
 (ns aoc2018-1
-  (:require [clojure.string :as str]))
+  (:require [clojure.string]))
 
 
 ;; 파트 1
 ;; 주어진 입력의 모든 숫자를 더하시오.
 ;; 예) +10 -2 -5 +1 이 입력일 경우 4를 출력
-(def vect (->>
-           "input/day1_input.txt"
-           (slurp)
-           (str/split-lines)
-           (map #(. Integer parseInt %))))
+(def input (->> (slurp "input/day1_input.txt")
+                (clojure.string/split-lines)
+                (map #(Integer/parseInt %))))
 
+(comment (reduce + input))
 
-(reduce + vect)
 
 ;; 파트 2
 ;; 주어진 입력의 숫자를 더할 때 마다 나오는 숫자 중, 처음으로 두번 나오는 숫자를 리턴하시오.
@@ -31,4 +29,4 @@
              (+ acc (first vect))
              (conj resultSet (+ acc (first vect)))))))
 
-(find-first-twice-number (cycle vect))
+(find-first-twice-number (cycle input))

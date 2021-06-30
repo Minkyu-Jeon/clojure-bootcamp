@@ -9,11 +9,10 @@
   [line]
   (->> (clojure.string/split line #"[^0-9]")
        (filter (complement clojure.string/blank?))
-       (map #(. Integer parseInt %))
+       (map #(Integer/parseInt %))
        (zipmap [:id :x :y :w :h])))
 
-(def claims (->> "input/day3_input.txt"
-                 (slurp)
+(def claims (->> (slurp "input/day3_input.txt")
                  (clojure.string/split-lines)
                  (map parse-line)))
 
@@ -56,6 +55,6 @@
 (comment (->>
           updated-fabric
           (filter (fn [[_ v]] (> v 1)))
-          (count)))
+          count))
 ;; Part 2
 (comment (:id (find-not-overlapped-area updated-fabric claims)))

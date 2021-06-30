@@ -1,5 +1,5 @@
 (ns aoc2018-2
-  (:require [clojure.string :as str])
+  (:require [clojure.string])
   (:require [clojure.core]))
 
 ;; 파트 1
@@ -15,31 +15,31 @@
 ;; ababab 3개의 a, 3개의 b 지만 한 문자열에서 같은 갯수는 한번만 카운트함 -> (두번 나오는 문자열 수: 4, 세번 나오는 문자열 수: 3)
 ;; 답 : 4 * 3 = 12
 
-(def vect (->> "input/day2_input.txt"
-               (slurp)
-               (str/split-lines)))
+(def input (->> (slurp "input/day2_input.txt")
+                (clojure.string/split-lines)))
 
 
-(defn two-three-vector [line]
-  (let [frequencySet (->> line
-                          (char-array)
-                          (seq)
-                          (frequencies)
-                          (vals)
-                          (into #{}))]
-    (->> [2 3]
-         (map (fn [item] (if (frequencySet item)
+(defn get-frequencies-vect
+  "한 줄과, 카운트 할 글자의 빈도수를 vector로 입력받아 vector에 위치에 해당하는 빈도로 나타난 글자가 있으면 1 없으면 0을 반환"
+  [line freq]
+  (let [frequency-set (->> line
+                           seq
+                           frequencies
+                           vals
+                           (into #{}))]
+    (->> freq
+         (map (fn [item] (if (frequency-set item)
                            1
                            0))))))
 
-(defn solve [vect]
-  (loop [vect vect m [0 0]]
-    (let [line (first vect)]
-      (if (nil? line)
-        (* (nth m 0) (nth m 1))
-        (recur (rest vect) (map + m (two-three-vector line)))))))
 
-(solve vect)
+
+(defn get-multiplied-value-of-two-three [input]
+  (->> input
+       (reduce (fn [acc line] (map + acc (get-frequencies-vect line [2 3]))) [0 0])
+       (apply *)))
+
+(get-multiplied-value-of-two-three input)
 
 
 
@@ -66,7 +66,7 @@
                      (nth item 0)
                      nil)))
    (keep identity)
-   (str/join)))
+   (clojure.string/join)))
 
 (defn make-string-pair [vect]
   (loop [total-vect []
@@ -78,14 +78,14 @@
         (recur total-vect (rest vect) (rest (rest vect)))
         (recur (conj total-vect [(first vect) (first vect2)]) vect (rest vect2))))))
 
-(->> vect
-     (make-string-pair)
-     (map (fn [[str1 str2]] (let
-                             [intersection (intersect-chars str1 str2)]
-                              (if (= (- (count str1) 1) (->> intersection (count)))
-                                intersection
-                                nil))))
-     (keep identity))
+(comment (->> input
+              (make-string-pair)
+              (map (fn [[str1 str2]] (let
+                                      [intersection (intersect-chars str1 str2)]
+                                       (if (= (- (count str1) 1) (->> intersection (count)))
+                                         intersection
+                                         nil))))
+              (keep identity)))
 
 
 ;; bvhaknyooqsudzrpggslectkj
